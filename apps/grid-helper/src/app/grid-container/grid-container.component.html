@@ -1,0 +1,169 @@
+<ng-container *ngIf="options_form && (store.unoptimized_code$ | async) as code ">
+    <form [formGroup]="options_form"
+          class="w-full h-full bg-slate-800 transition-all shadow-lg shadow-slate-900 grid grid-container-rows grid-container-cols overflow-x-scroll gap-8 p-4 pb-20">
+        <div class="row-start-1 col-start-1 place-self-center grid gap-0.5 items-end w-full h-full px-8 pt-4 pb-0 max-w-full">
+            <div class="flex w-full gap-0.5">
+                <button (click)="store.toggle_focus_mode()" class="p-1 grow bg-white rounded-tl-sm hover:bg-pink-500 hover:text-white transition-all">
+                    Preview
+                </button>
+                <button (click)="reset(true)" class="p-1 grow bg-white rounded-tr-sm hover:bg-pink-500 hover:text-white transition-all">
+                    Reset
+                </button>
+            </div>
+            <button (click)="generate_code()" class="p-4 h-full bg-white rounded-b-sm hover:bg-pink-500 hover:text-white transition-all">
+                Generate
+            </button>
+        </div>
+        <div #top class="row-start-1 col-start-2 grid gap-4 transition-all relative"
+             [style.column-gap]="code[2]"
+             [style.grid-template-columns]="code[0]"
+        >
+            <ng-container formArrayName="columns">
+                <ng-container *ngFor="let colForm of columns; let i = index">
+                    <grid-helper-input
+                            class="fade"
+                            [form]="colForm"
+                            [form_name]="'value'"
+                            [style_property]="'width'"
+                            [style_value]="columns[i].controls['value'].value + (columns[i].controls['unit'].value || 'px')"
+                            [label]="'' + i"
+                            [min_value]="70"
+                            [removable]="columns.length > 1"
+                            (remove)="store.remove_col(this.grid?.id ?? '0', i)"
+                    ></grid-helper-input>
+
+                </ng-container>
+            </ng-container>
+
+            <button class="bg-slate-100 hover:bg-pink-500 hover:text-white transition-all rounded-sm grid place-items-center w-8 h-8 absolute -right-16 top-2/4 -translate-y-2/4"
+                    (click)="store.add_col(grid?.id ?? '0')">+
+            </button>
+        </div>
+        <div #left class="row-start-2 cols-start-1 grid relative transition-all gap-4 grid-cols-2">
+            <div class="flex justify-start flex-col gap-4">
+                <grid-helper-input
+                        class="fade"
+                        [form]="from_width"
+                        [style_property]="'amount'"
+                        [form_name]="'from'"
+                        [label]="'Use grid from'"
+                        [default_unit]="unit.PX"
+                        [orientation]="'horizontal'"
+                ></grid-helper-input>
+                <grid-helper-input
+                        class="fade"
+                        [form]="to_width"
+                        [style_property]="'amount'"
+                        [form_name]="'to'"
+                        [label]="'Use grid to'"
+                        [default_unit]="unit.PX"
+                        [orientation]="'horizontal'"
+                ></grid-helper-input>
+                <grid-helper-input
+                        class="fade"
+                        [form]="col_gap"
+                        [style_property]="'amount'"
+                        [form_name]="'value'"
+                        [label]="'Col gap'"
+                        [default_unit]="unit.REM"
+                        [orientation]="'horizontal'"
+                ></grid-helper-input>
+                <grid-helper-input
+                        class="fade"
+                        [form]="row_gap"
+                        [style_property]="'amount'"
+                        [form_name]="'value'"
+                        [label]="'Row gap'"
+                        [default_unit]="unit.REM"
+                        [orientation]="'horizontal'"
+                ></grid-helper-input>
+            </div>
+            <div class="grid"
+                 [style.grid-template-rows]="code[1]"
+                 [style.row-gap]="code[3]"
+            >
+                <ng-container formArrayName="rows">
+                    <ng-container *ngFor="let rowForm of rows; let i = index">
+                        <grid-helper-input
+                                class="fade"
+                                [form]="rowForm"
+                                [style_property]="'height'"
+                                [form_name]="'value'"
+                                [style_value]="(rows[i].controls['value'].value > 50 ? rows[i].controls['value'].value : 50) + rows[i].controls['unit'].value || 'px'"
+                                [label]="'' + i"
+                                [min_value]="50"
+                                [orientation]="'vertical'"
+                                [removable]="rows.length > 1"
+                                (remove)="store.remove_row(this.grid?.id ?? '0', i)"
+                        ></grid-helper-input>
+                    </ng-container>
+                </ng-container>
+            </div>
+            <button class="bg-slate-100 hover:bg-pink-500 hover:text-white transition-all rounded-sm grid place-items-center w-8 h-8 absolute -bottom-16 left-2/4 -translate-x-2/4"
+                    (click)="store.add_row(this.grid?.id ?? '0')">+
+            </button>
+        </div>
+        <div
+                class="relative cols-start-2 row-start-2 grid w-full h-full gap-4 transition-all duration-500 ease-out select-none"
+                [style.grid-template-columns]="code[0]"
+                [style.grid-template-rows]="code[1]"
+                [style.row-gap]="code[3]"
+                [style.column-gap]="code[2]"
+                draggable="false"
+        >
+            <ng-container *ngFor="let row of grid_options.rows, let rIndex = index; trackBy: dimensionById"
+                          draggable="false">
+                <ng-container *ngFor="let col of grid_options.columns, let cIndex = index; trackBy: dimensionById"
+                              draggable="false">
+                    <div id="{{'element-'+rIndex+'-'+cIndex}}"
+                         style="animation-delay: {{(cIndex <= rIndex ? cIndex + 1 : rIndex + 1) * 75}}ms;"
+                         (mousedown)="start_section(rIndex, cIndex)"
+                         (mouseup)="end_section(rIndex, cIndex)"
+                         draggable="false"
+                         class="fade">
+                        <grid-helper-element
+                                id="{{'element-'+rIndex+'-'+cIndex}}"
+                                draggable="false"
+                        ></grid-helper-element>
+                    </div>
+
+                </ng-container>
+            </ng-container>
+
+            <div
+                    class="pointer-events-none absolute grid w-full h-full gap-4 transition-all duration-500 ease-out"
+                    [style.grid-template-columns]="code[0]"
+                    [style.grid-template-rows]="code[1]"
+                    [style.row-gap]="code[3]"
+                    [style.column-gap]="code[2]"
+                    draggable="false"
+            >
+                <ng-container *ngIf="store.sections$ | async as sections">
+                    <ng-container *ngFor="let section of sections; let index = index">
+                        <div class="w-full h-full relative opacity-60 border-white border pointer-events-none rounded-sm"
+                             [style.grid-area]="(section.from.y + 1) + '/' + (section.from.x + 1) + '/' + (section.to.y + 2) + '/' + (section.to.x + 2)"
+                             [style.background-color]="colors[index]"
+                             draggable="false"
+
+                        >
+                            <div class="absolute top-2 right-4">
+                                <button class="cursor-pointer pointer-events-auto" (click)="remove_section(index)">x
+                                </button>
+                            </div>
+                            <div class="absolute bottom-0 left-0 px-2 pb-2 truncate w-full">{{index}}
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+            </div>
+        </div>
+    </form>
+</ng-container>
+
+<dialog #appDialog class="backdrop:bg-neutral-900/80 backdrop:backdrop-blur-sm w-1/2">
+    <ng-container *ngIf="store.optimized_code$ | async as code">
+        <grid-helper-code-result [css_text]="code.css_text" [html_text]="code.html_text"/>
+
+    </ng-container>
+</dialog>

@@ -1,0 +1,83 @@
+<ng-container *ngIf="store.selectedGrid$ | async as entity">
+    <ng-container *ngIf="store.unoptimized_code$ | async as code">
+        <ng-container *ngIf="entity.tab as tab">
+            <div class="w-full h-full p-8 relative flex justify-center items-center">
+
+
+                <div #previewgrid
+                     class="resize-x overflow-hidden relative cols-start-2 row-start-2 grid gap-4 ease-out select-none"
+                     [style.grid-template-columns]="code[0]"
+                     [style.grid-template-rows]="code[1]"
+                     [style.row-gap]="code[3]"
+                     [style.column-gap]="code[2]"
+                     [style.width]="width_text"
+                     [style.height]="touched ? height + 'px' : '100%'"
+                     (mousedown)="start_resize()"
+                     (mouseup)="end_resize()"
+                     draggable="false"
+                >
+                    <ng-container *ngFor="let row of tab.grid_options.rows, let rIndex = index">
+                        <ng-container *ngFor="let col of tab.grid_options.columns, let cIndex = index">
+                            <div id="{{'element-'+rIndex+'-'+cIndex}}"
+                                 style="animation-delay: {{(cIndex <= rIndex ? cIndex + 1 : rIndex + 1) * 75}}ms;"
+                                 draggable="false"
+                                 class="fade">
+                                <grid-helper-element
+                                        id="{{'element-'+rIndex+'-'+cIndex}}"
+                                        draggable="false"
+                                ></grid-helper-element>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+
+                    <div
+                            class="pointer-events-none absolute grid w-full h-full gap-4 transition-all duration-500 ease-out"
+                            [style.grid-template-columns]="code[0]"
+                            [style.grid-template-rows]="code[1]"
+                            [style.row-gap]="code[3]"
+                            [style.column-gap]="code[2]"
+                            draggable="false"
+                    >
+                        <ng-container *ngIf="store.sections$ | async as sections">
+                            <ng-container *ngFor="let section of sections; let index = index">
+                                <div class="w-full h-full relative opacity-60 border-white border pointer-events-none rounded-sm"
+                                     [style.grid-area]="(section.from.y + 1) + '/' + (section.from.x + 1) + '/' + (section.to.y + 2) + '/' + (section.to.x + 2)"
+                                     [style.background-color]="colors[index]"
+                                     draggable="false"
+
+                                >
+                                    <div class="absolute bottom-0 left-0 px-2 pb-2 truncate w-full">{{index}}
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+
+                    </div>
+
+
+                </div>
+                <div class="absolute top-2 px-8 z-100 grow text-white text-lg transition-all w-full flex justify-between gap-4">
+                    <button (click)="store.toggle_focus_mode()" class="hover:text-pink-500 transition-all">
+                        Exit
+                    </button>
+                    <div class="flex justify-center gap-4">
+                        <label>width: <input class="bg-transparent h-5 border-none text-white focus:outline-none w-fit"
+                                             [style.width]="(width + '').length + 1 + 'ch'"
+                                             [(ngModel)]="width" min="1" type="number"/>px</label>
+                        <label>height: <input class="bg-transparent border-none text-white focus:outline-none w-fit"
+                                              [style.width]="(height + '').length + 1 + 'ch'"
+                                              [(ngModel)]="height" min="1" type="number"/>px</label>
+                    </div>
+                    <button (click)="save()" class="hover:text-pink-500 transition-all">
+                        Save width
+                    </button>
+                </div>
+
+
+            </div>
+        </ng-container>
+    </ng-container>
+</ng-container>
+
+
+
