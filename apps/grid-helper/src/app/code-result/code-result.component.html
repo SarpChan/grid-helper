@@ -1,0 +1,37 @@
+<div class="w-full h-full bg-slate-800 text-white rounded-sm">
+    <div class="grid grid-flow-col">
+        <div (click)="selectedTab = 'css'" [ngClass]="selectedTab === 'css' ? 'bg-slate-800 pointer-events-none' : 'bg-slate-700'" class="p-2 hover:text-slate-800 transition-all hover:bg-pink-500 cursor-pointer text-center">CSS</div>
+        <div (click)="selectedTab = 'html'" [ngClass]="selectedTab === 'html' ? 'bg-slate-800 pointer-events-none' : 'bg-slate-700'" class="p-2 hover:text-slate-800 transition-all hover:bg-pink-500 cursor-pointer text-center">HTML</div>
+    </div>
+    <ng-container [ngSwitch]="selectedTab">
+        <ng-container *ngSwitchCase="'css'">
+            <ng-container *ngTemplateOutlet="css_tab"></ng-container>
+        </ng-container>
+        <ng-container *ngSwitchCase="'html'">
+            <ng-container *ngTemplateOutlet="html_tab"></ng-container>
+        </ng-container>
+    </ng-container>
+
+    <button class="text-black w-full self-center bg-slate-100 hover:bg-pink-500 hover:text-white transition-all rounded-sm grid place-items-center h-10 p-2" (click)="copy_to_clipboard($event)">Copy to Clipboard
+    </button>
+</div>
+
+
+<ng-template #css_tab>
+    <div class="overflow-auto h-96">
+            <pre>
+      <code class="language-css">
+        {{css_text}}
+      </code>
+    </pre>
+    </div>
+</ng-template>
+<ng-template #html_tab>
+    <div class="overflow-auto h-96">
+            <pre>
+      <code class="language-html">
+        {{html_text}}
+      </code>
+    </pre>
+    </div>
+</ng-template>

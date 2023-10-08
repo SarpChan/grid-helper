@@ -1,0 +1,63 @@
+<ng-container *ngIf="background_label">
+    <div class="select-none absolute text-cyan-500/20 w-full h-full font-bold top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <svg class="w-full h-full" viewBox="0 0 10 16" fill="currentColor">
+            <text x="0" y="14"> {{background_label}}</text>
+        </svg>
+    </div>
+</ng-container>
+<form [formGroup]="form" class="transition-all duration-500 flex justify-center items-center flex-col min-w-[4rem]">
+    <div class="flex relative text-white gap-0.5" [class.flex-col]="orientation === 'horizontal'">
+        <ng-container *ngIf="label">
+            <label for="{{style_property}}" class="text-cyan-500 font-bold self-center">{{label}}</label>
+        </ng-container>
+
+        <ng-container *ngIf="orientation === 'horizontal'">
+            <input
+                    class="transition-all pl-2 rounded-t-sm border-b-0 w-full focus:outline-none bg-transparent border border-white -mb-0.5"
+                    id="{{style_property}}"
+                    type="number"
+                    formControlName="{{form_name}}"
+                    autocomplete="off"
+                    placeholder="{{placeholder ?? form_name}}"/>
+            <select
+                    class="transition-all pl-2 w-full bg-transparent focus:outline-none border border-white"
+                    [ngClass]="removable ? '' : 'rounded-b-sm'"
+                    formControlName="unit"
+                    id="h-unit">
+                <ng-container *ngFor="let unit of units">
+                    <option [value]="unit">{{unit}}</option>
+                </ng-container>
+            </select>
+            <ng-container *ngIf="removable">
+                <button class="bg-white rounded-b-sm grid place-items-center w-full text-black hover:bg-pink-500 hover:text-white transition-all"
+                        (click)="remove.emit()">-
+                </button>
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="orientation === 'vertical'">
+            <input
+                    class="pl-2 w-2/4 rounded-l-sm border-r-0 focus:outline-none bg-transparent border border-white -mr-0.5 transition-all"
+                    id="{{style_property}}"
+                    type="number"
+                    formControlName="{{form_name}}"
+                    autocomplete="off"
+                    placeholder="{{placeholder ?? form_name}}"/>
+            <select
+                    class="transition-all w-2/4 pl-2 bg-transparent focus:outline-none border border-white"
+                    [ngClass]="removable ? '' : 'rounded-r-sm'"
+                    formControlName="unit"
+                    id="v-unit">
+                ng-container *ngFor="let unit of units">
+                <ng-container *ngFor="let unit of units">
+                    <option [value]="unit">{{unit}}</option>
+                </ng-container>
+            </select>
+            <ng-container *ngIf="removable">
+
+                <button class="bg-white w-4 rounded-r-sm border hover:border-pink-500 grid place-items-center h-full text-black hover:bg-pink-500 hover:text-white transition-all"
+                        (click)="remove.emit()">-
+                </button>
+            </ng-container>
+        </ng-container>
+    </div>
+</form>

@@ -1,0 +1,27 @@
+.grid-container-rows {
+  grid-template-rows: minmax(min-content, 1fr) 4fr .5fr;
+}
+
+.grid-container-cols {
+  grid-template-columns: minmax(0, 1fr) 4fr .5fr;
+}
+
+
+.fade {
+  animation: fadein .5s;
+  animation-fill-mode: backwards;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes fadein {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+dialog::backdrop {
+  @apply bg-slate-400 opacity-20;
+}

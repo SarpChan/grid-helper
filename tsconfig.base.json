@@ -14,7 +14,12 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@grid-helper/fields": ["libs/fields/src/index.ts"],
+      "@grid-helper/generation": ["libs/generation/src/index.ts"],
+      "@grid-helper/logic": ["libs/logic/src/index.ts"],
+      "@grid-helper/store": ["libs/store/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

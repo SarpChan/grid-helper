@@ -1,2 +1,151 @@
-<grid-helper-nx-welcome></grid-helper-nx-welcome>
-<router-outlet></router-outlet>
+<ng-container *ngIf="{focused: facade.focus_mode$ | async} as focus">
+    <ng-container *ngIf="focus.focused">
+        <div class="w-full h-full">
+            <grid-helper-preview />
+        </div>
+    </ng-container>
+    <ng-container *ngIf="!focus.focused">
+        <div class="p-8 h-full grid rows">
+            <div class="flex gap-0.5 items-center justify-between">
+                <div class="flex gap-0.5 items-center">
+                    <ng-container *ngIf="facade.tabs$ | async as tabs">
+                        <ng-container *ngFor="let tab of tabs; let index = index">
+                            <ng-container *ngIf="tab.tab && tab.tab.specifier">
+                                <div [ngClass]="tab.id === selected_tab?.id ? 'bg-slate-800 text-white border-b-2 border-slate-800' : 'text-white border-b-2 hover:bg-pink-500 bg-slate-700 cursor-pointer'"
+                                     class="rounded-t-sm box-border select-none relative transition-all p-4"
+                                     (click)="select_tab(tab)">
+                                    <div class="text-center">{{tab?.tab?.name}}</div>
+                                    <div class="text-xs text-center">
+                                        <ng-container
+                                                *ngIf="!tab.tab.specifier.from && !tab.tab.specifier.to">
+                                            <span class="">All</span>
+                                        </ng-container>
+                                        <ng-container
+                                                *ngIf="!tab.tab.specifier.from && tab.tab.specifier.to">
+                                            <span class="">to {{tab.tab.specifier.to}}{{tab.tab.specifier.to_unit}}</span>
+                                        </ng-container>
+                                        <ng-container
+                                                *ngIf="tab.tab.specifier.from && !tab.tab.specifier.to">
+                                            <span class="">from {{tab.tab.specifier.from}}{{tab.tab.specifier.from_unit}}</span>
+                                        </ng-container>
+                                        <ng-container
+                                                *ngIf="tab.tab.specifier.from && tab.tab.specifier.to">
+                                        <span class="">{{tab.tab.specifier.from}}{{tab.tab.specifier.from_unit}}
+                                            to {{tab.tab.specifier.to}}{{tab.tab.specifier.to_unit}}</span>
+                                        </ng-container>
+                                    </div>
+                                    <ng-container *ngIf="tabs.length > 1">
+                                        <button class="absolute cursor-pointer pointer-events-auto top-0 right-2 hover:text-red-900 transition-all"
+                                                (click)="remove_tab(tab)">x
+                                        </button>
+                                    </ng-container>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </ng-container>
+
+                    <button class="ml-2 bg-slate-100 hover:bg-pink-500 transition-all rounded-sm grid place-items-center w-8 h-8"
+                            (click)="open_tab_creation()">+
+                    </button>
+                </div>
+                <div class="flex gap-4">
+                    <button class="ml-2 self-center bg-slate-100 hover:bg-pink-500 hover:text-white transition-all rounded-sm grid place-items-center h-10 p-2"
+                            (click)="generate_code()">Generate All Tabs
+                    </button>
+
+                    <div class="text-white flex items-end gap-2 h-10 select-none overflow-visible z-10">
+                        <div class="text-5xl text-slate-700">made</div>
+                        <div class="text-slate-400">
+                            <div class="">with <span class="text-[.4rem]">(a lot of)</span> ☕️</div>
+                            <div>by <a class="hover:text-pink-500 transition-all cursor-pointer overflow-visible">Sarp
+                                Can</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <grid-helper-tab (css_output)="setOutput($event)"></grid-helper-tab>
+        </div>
+    </ng-container>
+</ng-container>
+
+<dialog #tabDialog class="backdrop:bg-neutral-900/50 bg-slate-700 w-1/2 rounded-sm">
+    <form [formGroup]="tabForm" (submit)="add_tab()" class="flex flex-col gap-4 text-white px-8 py-4">
+        <div class="flex flex-col">
+            <label for="name">Tabname</label>
+            <input id="name"
+                   class="bg-slate-700 border border-white rounded-sm p-2 focus:outline-none focus:border-pink-500"
+                   [formControlName]="'name'" type="text"/>
+        </div>
+        <div class="grid grid-flow-col gap-4">
+            <div class="flex flex-col gap-4">
+                <div class="flex justify-start">
+                    <div class="flex flex-col grow">
+                        <label for="from">From</label>
+                        <input id="from"
+                               placeholder="empty = max([To])"
+                               class="bg-slate-700 h-12 border border-white rounded-l-sm p-2 focus:outline-none focus:border-pink-500 focus:border-r-white"
+                               [formControlName]="'from'" type="number"/>
+                    </div>
+                    <div class="flex flex-col justify-end">
+                        <select id="from_unit"
+                                class="bg-slate-700 h-12 border border-white rounded-r-sm border-l-0 p-2 focus:outline-none focus:border-pink-500"
+                                [formControlName]="'from_unit'">
+                            <ng-container *ngFor="let unit of units">
+                                <option [value]="unit">{{unit}}</option>
+                            </ng-container>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-start">
+
+                    <div class="flex flex-col grow">
+                        <label for="to">To</label>
+                        <input id="to"
+                               placeholder="empty = min([From])"
+                               class="h-12 bg-slate-700 border border-white rounded-l-sm p-2 focus:outline-none focus:border-pink-500 focus:border-r-white"
+                               [formControlName]="'to'" type="number"/>
+                    </div>
+                    <div class="flex flex-col justify-end">
+                        <select id="to_unit"
+                                class="h-12 bg-slate-700 border border-white rounded-r-sm border-l-0 p-2 focus:outline-none focus:border-pink-500"
+                                [formControlName]="'to_unit'">
+                            <ng-container *ngFor="let unit of units">
+                                <option [value]="unit">{{unit}}</option>
+                            </ng-container>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col">
+                    <label for="cols">Cols</label>
+                    <input id="cols"
+                           class="bg-transparent h-12 border border-white rounded-sm p-2 focus:outline-none focus:border-pink-500"
+                           [formControlName]="'cols'" type="number"/>
+                </div>
+                <div class="flex flex-col">
+                    <label for="rows">Rows</label>
+                    <input id="rows"
+                           class="bg-transparent placeholder h-12 border border-white rounded-sm p-2 focus:outline-none focus:border-pink-500"
+                           [formControlName]="'rows'" type="number"/>
+                </div>
+            </div>
+
+        </div>
+
+        <button class="ml-2 text-slate-800 self-center bg-slate-100 hover:bg-pink-500 transition-all rounded-sm grid place-items-center h-10 w-16 p-2"
+                type="submit">
+            Add
+        </button>
+    </form>
+</dialog>
+
+<dialog #generationDialog class="backdrop:bg-neutral-900/80 backdrop:backdrop-blur-sm w-2/3">
+    <ng-container *ngIf="facade.optimized_code_all_tabs$ | async as code">
+        <grid-helper-code-result [css_text]="code.css_text" [html_text]="code.html_text"/>
+
+    </ng-container>
+</dialog>
